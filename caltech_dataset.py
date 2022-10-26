@@ -29,6 +29,9 @@ class Caltech(VisionDataset):
           through the index
         - Labels should start from 0, so for Caltech you will have lables 0...100 (excluding the background class) 
         '''
+        with open(f'Caltech101/{self.split}.txt') as f:
+            self.data = [path.strip() for path in list(filter(lambda path: 'BACKGROUND_Google' not in path , f.readlines()))]
+        self.labels = list(dict.fromkeys([path.split('/')[0] for path in self.data]))
 
     def __getitem__(self, index):
         '''
@@ -40,10 +43,7 @@ class Caltech(VisionDataset):
             tuple: (sample, target) where target is class_index of the target class.
         '''
 
-        image, label = ... # Provide a way to access image and label via index
-                           # Image should be a PIL Image
-                           # label can be int
-
+        image, label = pil_loader(self.root + "/" + self.data[index]), self.labels.index(self.data[index].split('/')[0])
         # Applies preprocessing when accessing the image
         if self.transform is not None:
             image = self.transform(image)
@@ -55,5 +55,5 @@ class Caltech(VisionDataset):
         The __len__ method returns the length of the dataset
         It is mandatory, as this is used by several other components
         '''
-        length = ... # Provide a way to get the length (number of elements) of the dataset
+        length = len(self.data) # Provide a way to get the length (number of elements) of the dataset
         return length
