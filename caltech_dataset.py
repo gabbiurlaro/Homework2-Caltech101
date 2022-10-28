@@ -32,6 +32,8 @@ class Caltech(VisionDataset):
         with open(f'Caltech101/{self.split}.txt') as f:
             self.data = [path.strip() for path in list(filter(lambda path: 'BACKGROUND_Google' not in path , f.readlines()))]
         self.labels = list(dict.fromkeys([path.split('/')[0] for path in self.data]))
+        # preload also all images in RAM, to reduce training time
+        self.images = [ pil_loader(self.root + "/" + path) for path in self.data ]
 
     def __getitem__(self, index):
         '''
@@ -43,7 +45,7 @@ class Caltech(VisionDataset):
             tuple: (sample, target) where target is class_index of the target class.
         '''
 
-        image, label = pil_loader(self.root + "/" + self.data[index]), self.labels.index(self.data[index].split('/')[0])
+        image, label = self.images[index], self.labels.index(self.data[index].split('/')[0])
         # Applies preprocessing when accessing the image
         if self.transform is not None:
             image = self.transform(image)
